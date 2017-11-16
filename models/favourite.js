@@ -1,5 +1,10 @@
 var mongoose = require('mongoose')
 var Schema = mongoose.Schema;
+var ObjectId = Schema.ObjectId;
+var dishSchema = require('./dishes')
+
+
+
 
 
 var favouriteSchema = new Schema({
@@ -7,8 +12,13 @@ var favouriteSchema = new Schema({
 	id: String,
 	postedBy:{
 		type: mongoose.Schema.Types.ObjectId,
-		ref: 'User'
-	}
+		ref: 'User36'
+	},
+	dishes:[{
+		type: ObjectId,
+    ref: "Dish"}
+    ]
+
 
 
 })

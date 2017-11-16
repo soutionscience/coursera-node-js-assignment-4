@@ -18,7 +18,7 @@ var commentSchema = new Schema({
 	},
 	postedBy:{
 		type: mongoose.Schema.Types.ObjectId,
-		ref: 'User'
+		ref: 'User36'
 	}},
 	{
 		timestamps: true

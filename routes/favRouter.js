@@ -12,41 +12,48 @@ favouriteRouter.use(bodyParser.json());
 
 
 favouriteRouter.route('/')
-.get(verify.verifyOrdinaryUser, function(req, res, next){
+    .get(verify.verifyOrdinaryUser, function(req, res, next) {
 
 
-	  Favourites.find({}, function(err, fav){
-	  	if(err) throw err
-	  		res.json(fav)
-	  })
+        Favourites.find({}).populate('comments.postedBy')
+            .exec(function(err, dish) {
+                if (err) throw err;
+                res.json(dish);
+            });
 
-	  // .populate('comments.postedBy')
-   //          .exec(function(err, fav) {
-   //              if (err) throw err;
-   //              res.json(fav);
-   //          });
-   //   next();
-	// console.log('hitting')
+        // .populate('comments.postedBy')
+        //          .exec(function(err, fav) {
+        //              if (err) throw err;
+        //              res.json(fav);
+        //          });
+        //   next();
+        // console.log('hitting')
 
-	// res.send(200)
+        // res.send(200)
 
-})
-.post( verify.verifyOrdinaryUser, function(req, res, next){
-	Favourites.create(req.body, function(err, fav){
-		if(err) throw err;
-		console.log("favourite created")
-		var id = fav._id;
-		res.writeHead(200,{
-			'content-type': 'text/plain',
-		})
-		res.end('"added the comments with id: ' + id)
-	})
-})
+    })
+    .post(
+        verify.verifyOrdinaryUser,
+        function(req, res, next) {
 
-.delete(verify.verifyOrdinaryUser,  function(req, res, next){
-	console.log("item deleted")
-})
+            console.log("and here?")
+            var myFave = new Favourites(req.body)
+            myFave.dishes = req.body._id
+            myFave.save(function(err, fave) {
+                if (err) throw err;
+                console.log("favourite created")
+                var id = fave._id;
+                res.writeHead(200, {
+                    'content-type': 'text/plain',
+                })
+                res.end('"added this dish: ' + id + ' to favourites')
+
+            })
+
+        })
+
+    .delete(verify.verifyOrdinaryUser, function(req, res, next) {
+        console.log("item deleted")
+    })
 
 module.exports = favouriteRouter
-
-
