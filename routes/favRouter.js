@@ -12,12 +12,17 @@ favouriteRouter.use(bodyParser.json());
 
 
 favouriteRouter.route('/')
-    .get(verify.verifyOrdinaryUser, function(req, res, next) {
+    .all(verify.verifyOrdinaryUser)
+    .get(function(req, res, next) {
 
 
-        Favourites.find({}).populate('comments.postedBy')
+        Favourites.find({})
+            .populate('postedBy')
+            .populate('dishes')
+
             .exec(function(err, dish) {
                 if (err) throw err;
+                console.log("get")
                 res.json(dish);
             });
 
@@ -32,28 +37,61 @@ favouriteRouter.route('/')
         // res.send(200)
 
     })
-    .post(
-        verify.verifyOrdinaryUser,
-        function(req, res, next) {
-
-            console.log("and here?")
-            var myFave = new Favourites(req.body)
-            myFave.dishes = req.body._id
-            myFave.save(function(err, fave) {
-                if (err) throw err;
-                console.log("favourite created")
-                var id = fave._id;
-                res.writeHead(200, {
-                    'content-type': 'text/plain',
+    .post(function(req, res, next) {
+        var id = req.decoded._doc._id
+        console.log("decoded" + id)
+        Favourites.findOne({ postedBy: id }, function(err, fav) {
+            if (err) throw err;
+            if (!fav) {
+                console.log("no fav")
+                req.body.postedBy = id;
+                var newFav = new Favourites({ dishes: req.body._id, postedBy: id });
+                newFav.save(function(err, newFav) {
+                    if (err) throw err
+                    res.json(newFav)
                 })
-                res.end('"added this dish: ' + id + ' to favourites')
+            } else {
+                fav.dishes.push(req.body._id)
+                fav.save(function(err, newFav) {
+                    if (err) {
+                        throw err;
+                        // next(new Error("Favourite already added"))
+                        // next();
 
-            })
+                    }
+                    res.json(newFav)
+                })
+            }
+
 
         })
 
-    .delete(verify.verifyOrdinaryUser, function(req, res, next) {
-        console.log("item deleted")
+
     })
+
+
+    .delete(verify.verifyOrdinaryUser, verify.verifyAdmin, function(req, res, next) {
+        Favourites.remove({}, function(err, fav) {
+            if (err) throw err;
+            res.send("all dished deleted")
+        })
+    })
+
+favouriteRouter.route('/:favId')
+
+    .delete(verify.verifyOrdinaryUser, function(req, res, next) {
+        var id = req.decoded._doc._id
+        Favourites.findOne({postedBy: id}, function(err, fav){
+            if(err) throw err;
+            console.log(fav.dishes)
+             fav.dishes(req.params.favId).remove();
+            // fav.save(function(err, dish){
+            //     if(err) throw err;
+            //     res.json(dish)
+            // })
+        })
+})
+
+
 
 module.exports = favouriteRouter

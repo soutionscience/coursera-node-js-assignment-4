@@ -37,6 +37,7 @@ var favRouter= require('./routes/favRouter');
 
 var app = express();
 
+//redirect traffic if http is used instead of https
 app.all('*', function(req, res, next){
   if(req.secure){
     return next()

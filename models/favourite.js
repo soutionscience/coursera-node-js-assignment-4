@@ -9,15 +9,17 @@ var dishSchema = require('./dishes')
 
 var favouriteSchema = new Schema({
 
-	id: String,
-	postedBy:{
+	dishes:[{
+		type: mongoose.Schema.Types.ObjectId,
+		ref: 'Dish'
+	}],
+
+    postedBy:{
 		type: mongoose.Schema.Types.ObjectId,
 		ref: 'User36'
-	},
-	dishes:[{
-		type: ObjectId,
-    ref: "Dish"}
-    ]
+	}
+
+	
 
 
 
