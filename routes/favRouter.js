@@ -70,6 +70,7 @@ favouriteRouter.route('/')
     })
 
 
+
     .delete(verify.verifyOrdinaryUser, verify.verifyAdmin, function(req, res, next) {
         Favourites.remove({}, function(err, fav) {
             if (err) throw err;
@@ -80,18 +81,16 @@ favouriteRouter.route('/')
 favouriteRouter.route('/:favId')
 
     .delete(verify.verifyOrdinaryUser, function(req, res, next) {
-        var id = req.decoded._doc._id
-        Favourites.findOne({postedBy: id}, function(err, fav){
-            if(err) throw err;
-            console.log(fav.dishes)
-             fav.dishes(req.params.favId).remove();
-            // fav.save(function(err, dish){
-            //     if(err) throw err;
-            //     res.json(dish)
-            // })
-        })
+var id = req.decoded._doc._id
+Favourites.findOneAndUpdate({postedBy: id}, {$pull:{dishes: req.params.favId}}, function(err, data){
+    if(err){
+        return res.status(500).json({'Error': "error in deleting favourite"})
+    }
+    res.json(data)
 })
 
+
+ })
 
 
 module.exports = favouriteRouter
